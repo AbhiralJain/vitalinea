@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "317178763295",
+    "project_id": "vitalinea-c0cbd",
+    "storage_bucket": "vitalinea-c0cbd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:317178763295:android:cb1df2ccbddccdc79b5d2a",
+        "android_client_info": {
+          "package_name": "com.crossplat.vitalinea"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "317178763295-eqrlo1g4h3d59i6vhescqjnt7d52en7e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.crossplat.vitalinea",
+            "certificate_hash": "3f3b05b35b0c5fd4ba15d054c6214b193bbe3189"
+          }
+        },
+        {
+          "client_id": "317178763295-7oag4aqh5lmpt1jl9of0fsqpu9lc6f6q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpfvqiQ8ap3mVZgLKjzVCN4TrC7tbXDVA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "317178763295-7oag4aqh5lmpt1jl9of0fsqpu9lc6f6q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
