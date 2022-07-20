@@ -286,6 +286,7 @@ class _RequestPageState extends State<RequestPage> {
                   ),
                   onPressed: () async {
                     CollectionReference requests = FirebaseFirestore.instance.collection('requests');
+                    CollectionReference users = FirebaseFirestore.instance.collection('users');
                     final prefs = await SharedPreferences.getInstance();
                     String phonenumber = prefs.getString('phonenumber')!;
                     var rData = {
@@ -298,7 +299,14 @@ class _RequestPageState extends State<RequestPage> {
                       'lng': 0,
                       'tcost': _tc,
                     };
-
+                    var uData = {
+                      'blood': _bloodgroup,
+                      'city': _city.text,
+                      'pin': _pincode.text,
+                      'lat': 0,
+                      'lng': 0,
+                    };
+                    users.doc(phonenumber).update(uData);
                     requests.doc(phonenumber).get().then((doc) {
                       if (doc.exists) {
                         doc.reference.update(rData);
@@ -319,7 +327,7 @@ class _RequestPageState extends State<RequestPage> {
                           color: MyApp.myColor,
                           onPressed: () async {
                             Navigator.pop(context);
-                            Navigator.pop(context);
+                            Navigator.pop(context, true);
                           },
                           width: 120,
                           child: const Text(

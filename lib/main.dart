@@ -7,7 +7,6 @@ import 'package:vitalinea/pages/signin.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
   runApp(const MyApp());
 }
 

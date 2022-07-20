@@ -3,8 +3,11 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vitalinea/main.dart';
 import 'package:vitalinea/pages/homepage.dart';
+import 'package:vitalinea/program/config.dart';
 
 class OtpPage extends StatefulWidget {
   final String countrycode;
@@ -23,56 +26,12 @@ class _OtpPageState extends State<OtpPage> {
   User? user;
   FocusNode f1 = FocusNode();
   TextEditingController t1 = TextEditingController();
-  FocusNode f2 = FocusNode();
-  TextEditingController t2 = TextEditingController();
-  FocusNode f3 = FocusNode();
-  TextEditingController t3 = TextEditingController();
-  FocusNode f4 = FocusNode();
-  TextEditingController t4 = TextEditingController();
-  FocusNode f5 = FocusNode();
-  TextEditingController t5 = TextEditingController();
-  FocusNode f6 = FocusNode();
-  TextEditingController t6 = TextEditingController();
   late Timer timer;
-
-  Widget otpfield(ctrl, fcs, margin) {
-    return Flexible(
-      child: Card(
-        elevation: 0,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
-        margin: margin,
-        color: Theme.of(context).canvasColor,
-        child: TextField(
-          onChanged: (value) {
-            if (fcs != f6) {
-              FocusScope.of(context).nextFocus();
-            } else {
-              FocusScope.of(context).unfocus();
-            }
-          },
-          textAlign: TextAlign.center,
-          keyboardType: TextInputType.number,
-          controller: ctrl,
-          maxLength: 1,
-          cursorColor: Theme.of(context).primaryColor,
-          decoration: const InputDecoration(
-            hintText: "",
-            counterText: '',
-            border: InputBorder.none,
-          ),
-        ),
-      ),
-    );
-  }
 
   verifyPhoneNumber() async {
     await FirebaseAuth.instance.verifyPhoneNumber(
       phoneNumber: '${widget.countrycode}${widget.phonenumber}',
-      verificationCompleted: (userCreds) async {
-        await FirebaseAuth.instance.signInWithCredential(userCreds);
-        final prefs = await SharedPreferences.getInstance();
-        prefs.setBool('signed', true);
-      },
+      verificationCompleted: (userCreds) async {},
       verificationFailed: (FirebaseAuthException e) => print(e),
       codeSent: (String verificationID, int? resendToken) => _otp = verificationID,
       codeAutoRetrievalTimeout: (verificationID) => print('Timeout'),
@@ -81,8 +40,17 @@ class _OtpPageState extends State<OtpPage> {
   }
 
   void verifyOTP() async {
-    PhoneAuthCredential credential = PhoneAuthProvider.credential(
-        verificationId: _otp, smsCode: '${t1.text}${t2.text}${t3.text}${t4.text}${t5.text}${t6.text}');
+    Alert(
+      style: Config.alertConfig,
+      context: context,
+      title: 'Verifying OTP',
+      content: const Padding(
+        padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      buttons: [],
+    ).show();
+    PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: _otp, smsCode: t1.text);
 
     await FirebaseAuth.instance.signInWithCredential(credential).then(
       (value) {
@@ -94,8 +62,6 @@ class _OtpPageState extends State<OtpPage> {
       () async {
         if (user != null) {
           final prefs = await SharedPreferences.getInstance();
-          prefs.setBool('signed', true);
-          prefs.setString('phonenumber', '${widget.countrycode}${widget.phonenumber}');
           CollectionReference users = FirebaseFirestore.instance.collection('users');
           var userData = {
             'name': widget.name,
@@ -108,19 +74,46 @@ class _OtpPageState extends State<OtpPage> {
             'lng': 0,
             'blood': 'N.A'
           };
-
+          prefs.setBool('signed', true);
+          prefs.setString('phonenumber', '${widget.countrycode}${widget.phonenumber}');
           users.doc('${widget.countrycode}${widget.phonenumber}').get().then((doc) async {
             if (!(doc.exists)) {
               users.doc('${widget.countrycode}${widget.phonenumber}').set(userData);
+            } else {
+              users.doc('${widget.countrycode}${widget.phonenumber}').update(userData);
             }
-            Navigator.of(context).pushReplacement(
+            Navigator.pop(context);
+            Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => const Homepage(),
               ),
             );
           });
         } else {
-          print('failed');
+          Navigator.pop(context);
+          Alert(
+            style: Config.alertConfig,
+            context: context,
+            title: 'Error!',
+            desc: 'An Unexpected error occured. Please try again.',
+            buttons: [
+              DialogButton(
+                highlightColor: const Color.fromRGBO(0, 0, 0, 0),
+                splashColor: const Color.fromRGBO(0, 0, 0, 0),
+                radius: const BorderRadius.all(Radius.circular(20)),
+                color: MyApp.myColor,
+                onPressed: () async {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                width: 120,
+                child: const Text(
+                  "OK",
+                  style: TextStyle(fontFamily: 'Montserrat', color: Colors.white),
+                ),
+              )
+            ],
+          ).show();
         }
       },
     );
@@ -155,16 +148,32 @@ class _OtpPageState extends State<OtpPage> {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                otpfield(t1, f1, const EdgeInsets.fromLTRB(8, 15, 8, 15)),
-                otpfield(t2, f2, const EdgeInsets.fromLTRB(8, 15, 8, 15)),
-                otpfield(t3, f3, const EdgeInsets.fromLTRB(8, 15, 8, 15)),
-                otpfield(t4, f4, const EdgeInsets.fromLTRB(8, 15, 8, 15)),
-                otpfield(t5, f5, const EdgeInsets.fromLTRB(8, 15, 8, 15)),
-                otpfield(t6, f6, const EdgeInsets.fromLTRB(8, 15, 8, 15)),
-              ],
+            Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.only(left: 24, right: 8),
+              height: 64,
+              decoration: BoxDecoration(
+                color: Theme.of(context).canvasColor,
+                borderRadius: const BorderRadius.all(Radius.circular(20)),
+              ),
+              margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 16),
+              child: TextField(
+                onChanged: (value) {
+                  if (value.length == 6) {
+                    FocusScope.of(context).unfocus();
+                  }
+                },
+                style: const TextStyle(letterSpacing: 16),
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
+                controller: t1,
+                cursorColor: Theme.of(context).primaryColor,
+                decoration: const InputDecoration(
+                  hintText: "",
+                  counterText: '',
+                  border: InputBorder.none,
+                ),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -174,6 +183,7 @@ class _OtpPageState extends State<OtpPage> {
                   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
                 ),
                 onPressed: () {
+                  timer.cancel();
                   verifyOTP();
                 },
                 child: Text(

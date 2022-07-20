@@ -1,6 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:vitalinea/pages/otp.dart';
+import 'package:vitalinea/program/config.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({Key? key}) : super(key: key);
@@ -135,7 +139,24 @@ class _SignInPageState extends State<SignInPage> {
                   padding: const EdgeInsets.all(15),
                   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
                 ),
-                onPressed: () {
+                onPressed: () async {
+                  bool status = await Config.requestpermission(Permission.location);
+                  if (status) {
+                    Alert(
+                      style: Config.alertConfig,
+                      context: context,
+                      title: 'Sending OTP',
+                      content: const Padding(
+                        padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                      buttons: [],
+                    ).show();
+                    Config.position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+                  } else {
+                    print('error p');
+                  }
+                  Navigator.pop(context);
                   Navigator.push(
                     context,
                     MaterialPageRoute(

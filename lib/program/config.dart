@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:vitalinea/main.dart';
 
 class Config {
+  static Position? position;
   static AlertStyle get alertConfig {
     return AlertStyle(
       backgroundColor: MyApp.myColor.shade50,

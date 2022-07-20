@@ -2,10 +2,9 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:geolocator/geolocator.dart';
+
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:permission_handler/permission_handler.dart';
+
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -37,14 +36,10 @@ class _HomepageState extends State<Homepage> {
   late BitmapDescriptor op;
   late BitmapDescriptor on;
   bool _menubar = false;
+  bool _request = false;
   int totaldonors = 0;
   final Completer _controller = Completer();
   final Set<Marker> markers = {};
-  late Position position;
-  final CameraPosition _kGooglePlex = const CameraPosition(
-    target: LatLng(21.1469007, 79.040759),
-    zoom: 15,
-  );
   Map udata = {
     'name': '',
     'phone': '',
@@ -54,16 +49,6 @@ class _HomepageState extends State<Homepage> {
     'td': '',
     'donor': false,
   };
-
-  getlocation() async {
-    bool status = await Config.requestpermission(Permission.location);
-    if (status) {
-      position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-      print(position);
-    } else {
-      print('error p');
-    }
-  }
 
   getUserData() async {
     CollectionReference user = FirebaseFirestore.instance.collection('users');
@@ -84,15 +69,22 @@ class _HomepageState extends State<Homepage> {
   }
 
   initmarker() async {
-    my = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(8, 8)), 'assets/markers/my.bmp');
-    abp = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(8, 8)), 'assets/markers/abp.bmp');
-    abn = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(8, 8)), 'assets/markers/abn.bmp');
-    ap = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(8, 8)), 'assets/markers/ap.bmp');
-    an = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(8, 8)), 'assets/markers/an.bmp');
-    bp = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(8, 8)), 'assets/markers/bp.bmp');
-    bn = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(8, 8)), 'assets/markers/bn.bmp');
-    op = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(8, 8)), 'assets/markers/op.bmp');
-    on = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(8, 8)), 'assets/markers/on.bmp');
+    my = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(6, 6)), 'assets/markers/my.bmp');
+    abp = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(10, 10)), 'assets/markers/abp.bmp');
+    abn = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(10, 10)), 'assets/markers/abn.bmp');
+    ap = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(10, 10)), 'assets/markers/ap.bmp');
+    an = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(10, 10)), 'assets/markers/an.bmp');
+    bp = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(10, 10)), 'assets/markers/bp.bmp');
+    bn = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(10, 10)), 'assets/markers/bn.bmp');
+    op = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(10, 10)), 'assets/markers/op.bmp');
+    on = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(10, 10)), 'assets/markers/on.bmp');
+    setState(() {
+      markers.add(Marker(
+        icon: my,
+        markerId: const MarkerId('mylocation'),
+        position: LatLng(Config.position!.latitude, Config.position!.longitude),
+      ));
+    });
   }
 
   List<Map> donorlist = [];
@@ -234,8 +226,11 @@ class _HomepageState extends State<Homepage> {
       Alert(
         style: Config.alertConfig,
         context: context,
-        title: 'Please wait',
-        desc: 'Fetching your location.',
+        title: 'Getting things ready',
+        content: const Padding(
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: Center(child: CircularProgressIndicator()),
+        ),
         buttons: [],
       ).show();
     });
@@ -249,21 +244,23 @@ class _HomepageState extends State<Homepage> {
           children: [
             GoogleMap(
               onTap: (ltlng) {
-                print(ltlng);
+                setState(() {
+                  _menubar = !_menubar;
+                });
               },
               markers: markers,
               zoomControlsEnabled: false,
               mapToolbarEnabled: false,
-              initialCameraPosition: _kGooglePlex,
+              initialCameraPosition: CameraPosition(
+                target: LatLng(Config.position!.latitude, Config.position!.longitude),
+                zoom: 15,
+              ),
               onMapCreated: (GoogleMapController controller) async {
                 controller.setMapStyle(Config.mapStyle);
                 setState(() {
                   _controller.complete(controller);
                 });
-
-                await getlocation();
-                await myl();
-                await getdonors();
+                await initmarker();
                 await getUserData();
                 Navigator.pop(context);
               },
@@ -296,7 +293,7 @@ class _HomepageState extends State<Homepage> {
                       ),
                       const Spacer(flex: 2),
                       Text(
-                        "$totaldonors donors around you",
+                        !_request ? 'Hello ${udata['name'].split(' ').first}!' : "$totaldonors donors around you",
                         style: const TextStyle(
                           fontSize: 16,
                           fontFamily: 'Montserrat',
@@ -316,15 +313,19 @@ class _HomepageState extends State<Homepage> {
                       padding: const EdgeInsets.all(15),
                       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
                     ),
-                    onPressed: () {
-                      Navigator.of(context).push(
+                    onPressed: () async {
+                      _request = await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => RequestPage(
-                            lat: position.latitude,
-                            lng: position.longitude,
+                            lat: Config.position!.latitude,
+                            lng: Config.position!.longitude,
                           ),
                         ),
                       );
+
+                      if (_request) {
+                        await getdonors();
+                      }
                     },
                     child: const Text(
                       'Request Blood',
@@ -406,8 +407,8 @@ class _HomepageState extends State<Homepage> {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) => DonatePage(
-                                    lat: position.latitude,
-                                    lng: position.longitude,
+                                    lat: Config.position!.latitude,
+                                    lng: Config.position!.longitude,
                                   ),
                                 ),
                               );
@@ -426,25 +427,5 @@ class _HomepageState extends State<Homepage> {
         ),
       ),
     );
-  }
-
-  Future<void> myl() async {
-    final GoogleMapController controller = await _controller.future;
-    controller.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: LatLng(position.latitude, position.longitude),
-          zoom: 15,
-        ),
-      ),
-    );
-    await initmarker();
-    setState(() {
-      markers.add(Marker(
-        icon: my,
-        markerId: const MarkerId('mylocation'),
-        position: LatLng(position.latitude, position.longitude),
-      ));
-    });
   }
 }
