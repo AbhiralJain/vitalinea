@@ -13,7 +13,7 @@ class MyWidget extends StatelessWidget {
       curve: Curves.decelerate,
       left: controller ? 0 : -250,
       child: Container(
-        padding: EdgeInsets.only(left: 8),
+        padding: const EdgeInsets.only(left: 8),
         height: MediaQuery.of(context).size.height,
         width: 250,
         decoration: BoxDecoration(

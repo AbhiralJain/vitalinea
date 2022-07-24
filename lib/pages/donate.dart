@@ -1,10 +1,8 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vitalinea/main.dart';
@@ -20,26 +18,17 @@ class DonatePage extends StatefulWidget {
 }
 
 class _DonatePageState extends State<DonatePage> {
-  TextEditingController _city = TextEditingController();
-  TextEditingController _pincode = TextEditingController();
+  final TextEditingController _city = TextEditingController();
+  final TextEditingController _pincode = TextEditingController();
   final Completer _controller = Completer();
   String _bloodgroup = 'A+';
   late Position position;
   Set<Marker> markers = {};
   bool _agr = false;
-  getlocation() async {
-    bool status = await Config.requestpermission(Permission.location);
-    if (status) {
-      position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-      print(position);
-    } else {
-      print('error p');
-    }
-  }
 
   late BitmapDescriptor my;
   initmarker() async {
-    my = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(8, 8)), 'assets/markers/my.bmp');
+    my = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(6, 6)), 'assets/markers/my.bmp');
   }
 
   @override
@@ -150,7 +139,6 @@ class _DonatePageState extends State<DonatePage> {
                       onChanged: (String? newValue) {
                         setState(() {
                           _bloodgroup = newValue!;
-                          print(_bloodgroup);
                         });
                       },
                       items: <String>['A+', 'A-', 'AB+', 'AB-', 'B+', 'B-', 'O+', 'O-']
@@ -182,7 +170,7 @@ class _DonatePageState extends State<DonatePage> {
                 ),
               ),
               ClipRRect(
-                borderRadius: BorderRadius.all(Radius.circular(15)),
+                borderRadius: const BorderRadius.all(Radius.circular(15)),
                 child: SizedBox(
                   height: 200,
                   child: GoogleMap(
@@ -199,11 +187,8 @@ class _DonatePageState extends State<DonatePage> {
                         _controller.complete(controller);
                       });
                       await initmarker();
-                      await getlocation();
                     },
                     onTap: (latlng) async {
-                      print(latlng);
-
                       setState(() {
                         markers = {};
                         markers.add(
@@ -265,8 +250,8 @@ class _DonatePageState extends State<DonatePage> {
                             'pin': _pincode.text,
                             'donor': true,
                             'donations': 0,
-                            'lat': position.latitude,
-                            'lng': position.longitude,
+                            'lat': position.latitude.toString(),
+                            'lng': position.longitude.toString(),
                             'blood': _bloodgroup
                           };
                           final prefs = await SharedPreferences.getInstance();
@@ -275,7 +260,7 @@ class _DonatePageState extends State<DonatePage> {
                           Alert(
                             style: Config.alertConfig,
                             context: context,
-                            title: 'You are a noble person',
+                            title: 'You are a noble person!',
                             desc: 'Thank you for being a blood donor and for your contributions to the society.',
                             buttons: [
                               DialogButton(
@@ -285,7 +270,7 @@ class _DonatePageState extends State<DonatePage> {
                                 color: MyApp.myColor,
                                 onPressed: () async {
                                   Navigator.pop(context);
-                                  Navigator.pop(context);
+                                  Navigator.pop(context, true);
                                 },
                                 width: 120,
                                 child: const Text(

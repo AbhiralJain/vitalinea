@@ -52,22 +52,28 @@ class _RequestsPageState extends State<RequestsPage> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        document['name'],
-                                        style: Theme.of(context).textTheme.titleMedium,
-                                      ),
-                                      Text(
-                                        document['phone'],
-                                        style: Theme.of(context).textTheme.labelSmall,
-                                      ),
-                                    ],
+                                  Flexible(
+                                    flex: 5,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          document['name'],
+                                          style: Theme.of(context).textTheme.titleMedium,
+                                        ),
+                                        Text(
+                                          document['phone'],
+                                          style: Theme.of(context).textTheme.labelSmall,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  Text(
-                                    document['bloodtype'],
-                                    style: Theme.of(context).textTheme.titleLarge,
+                                  Flexible(
+                                    flex: 2,
+                                    child: Text(
+                                      document['bloodtype'],
+                                      style: Theme.of(context).textTheme.titleLarge,
+                                    ),
                                   ),
                                 ],
                               ),

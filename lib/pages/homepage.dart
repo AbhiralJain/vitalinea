@@ -1,10 +1,7 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -81,7 +78,7 @@ class _HomepageState extends State<Homepage> {
     setState(() {
       markers.add(Marker(
         icon: my,
-        markerId: const MarkerId('mylocation'),
+        markerId: MarkerId(udata['name']),
         position: LatLng(Config.position!.latitude, Config.position!.longitude),
       ));
     });
@@ -96,7 +93,6 @@ class _HomepageState extends State<Homepage> {
     final String myphonenumber = prefs.getString('phonenumber')!;
     DocumentSnapshot<Object?> myobj = await users.doc(myphonenumber).get();
     final String mypin = myobj.get('pin');
-    print('$myphonenumber -- $mypin');
 
     for (int i = 0; i < list.docs.length; i++) {
       if (list.docs[i].get('donor') == true &&
@@ -115,7 +111,6 @@ class _HomepageState extends State<Homepage> {
         });
       }
     }
-    print(donorlist);
     setState(() {
       totaldonors = donorlist.length;
     });
@@ -152,8 +147,8 @@ class _HomepageState extends State<Homepage> {
       setState(() {
         markers.add(Marker(
             icon: myicon,
-            markerId: MarkerId('donor$i'),
-            position: LatLng(donorlist[i]['lat'], donorlist[i]['lng']),
+            markerId: MarkerId(donorlist[i]['phone']),
+            position: LatLng(double.parse(donorlist[i]['lat']), double.parse(donorlist[i]['lng'])),
             onTap: () {
               Alert(
                 style: Config.alertConfig,
@@ -173,7 +168,6 @@ class _HomepageState extends State<Homepage> {
                       } else {
                         throw 'Could not launch $url';
                       }
-                      Navigator.pop(context);
                     },
                     width: 120,
                     child: const Text(
@@ -185,7 +179,6 @@ class _HomepageState extends State<Homepage> {
               ).show();
             }));
       });
-      print(markers);
     }
   }
 
@@ -245,7 +238,7 @@ class _HomepageState extends State<Homepage> {
             GoogleMap(
               onTap: (ltlng) {
                 setState(() {
-                  _menubar = !_menubar;
+                  if (_menubar) _menubar = false;
                 });
               },
               markers: markers,
@@ -262,7 +255,6 @@ class _HomepageState extends State<Homepage> {
                 });
                 await initmarker();
                 await getUserData();
-                Navigator.pop(context);
               },
             ),
             Column(
@@ -356,11 +348,11 @@ class _HomepageState extends State<Homepage> {
                       Icons.arrow_back_ios_new_rounded,
                     ),
                   ),
-                  const Text(
-                    'Abhiral Jain',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32),
+                  Text(
+                    udata['name'],
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 32),
                   ),
-                  Text('+91 8830693895'),
+                  Text(udata['phone']),
                   const Spacer(),
                   menubuttons('Home', null),
                   menubuttons(
@@ -403,8 +395,8 @@ class _HomepageState extends State<Homepage> {
                               padding: const EdgeInsets.all(15),
                               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
                             ),
-                            onPressed: () {
-                              Navigator.of(context).push(
+                            onPressed: () async {
+                              bool donate = await Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) => DonatePage(
                                     lat: Config.position!.latitude,
@@ -412,6 +404,10 @@ class _HomepageState extends State<Homepage> {
                                   ),
                                 ),
                               );
+
+                              if (donate) {
+                                await getUserData();
+                              }
                             },
                             child: Text(
                               'Donate Blood',

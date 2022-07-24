@@ -23,7 +23,7 @@ class ProfilePage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Blood group: ', textAlign: TextAlign.center),
+                  const Text('Blood group: ', textAlign: TextAlign.center),
                   Text(udata['blood'], style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
                 ],
               ),
@@ -31,7 +31,7 @@ class ProfilePage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Total donations: ', textAlign: TextAlign.center),
+                  const Text('Total donations: ', textAlign: TextAlign.center),
                   Text(udata['td'].toString(),
                       style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
                 ],

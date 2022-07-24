@@ -1,12 +1,19 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vitalinea/pages/homepage.dart';
 import 'package:vitalinea/pages/signin.dart';
+import 'package:vitalinea/program/config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  bool status = await Config.requestpermission(Permission.location);
+  if (status) {
+    Config.position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+  } else {}
   runApp(const MyApp());
 }
 

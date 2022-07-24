@@ -32,9 +32,9 @@ class _OtpPageState extends State<OtpPage> {
     await FirebaseAuth.instance.verifyPhoneNumber(
       phoneNumber: '${widget.countrycode}${widget.phonenumber}',
       verificationCompleted: (userCreds) async {},
-      verificationFailed: (FirebaseAuthException e) => print(e),
+      verificationFailed: (FirebaseAuthException e) {},
       codeSent: (String verificationID, int? resendToken) => _otp = verificationID,
-      codeAutoRetrievalTimeout: (verificationID) => print('Timeout'),
+      codeAutoRetrievalTimeout: (verificationID) {},
       timeout: const Duration(seconds: 60),
     );
   }
@@ -70,8 +70,8 @@ class _OtpPageState extends State<OtpPage> {
             'pin': 'N.A',
             'donor': false,
             'donations': 0,
-            'lat': 0,
-            'lng': 0,
+            'lat': 'N.A',
+            'lng': 'N.A',
             'blood': 'N.A'
           };
           prefs.setBool('signed', true);

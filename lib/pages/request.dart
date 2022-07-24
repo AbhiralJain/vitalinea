@@ -20,12 +20,13 @@ class RequestPage extends StatefulWidget {
 }
 
 class _RequestPageState extends State<RequestPage> {
-  TextEditingController _name = TextEditingController();
-  TextEditingController _city = TextEditingController();
-  TextEditingController _pincode = TextEditingController();
+  final TextEditingController _name = TextEditingController();
+  final TextEditingController _city = TextEditingController();
+  final TextEditingController _pincode = TextEditingController();
   String _bloodgroup = 'A+';
-  bool _pointed = false;
   late Position position;
+  String lat = '';
+  String lng = '';
   final Completer _controller = Completer();
   bool _tc = false;
   Set<Marker> markers = {};
@@ -33,15 +34,12 @@ class _RequestPageState extends State<RequestPage> {
     bool status = await Config.requestpermission(Permission.location);
     if (status) {
       position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-      print(position);
-    } else {
-      print('error p');
-    }
+    } else {}
   }
 
   late BitmapDescriptor my;
   initmarker() async {
-    my = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(8, 8)), 'assets/markers/my.bmp');
+    my = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(6, 6)), 'assets/markers/my.bmp');
   }
 
   @override
@@ -179,7 +177,6 @@ class _RequestPageState extends State<RequestPage> {
                       onChanged: (String? newValue) {
                         setState(() {
                           _bloodgroup = newValue!;
-                          print(_bloodgroup);
                         });
                       },
                       items: <String>['A+', 'A-', 'AB+', 'AB-', 'B+', 'B-', 'O+', 'O-']
@@ -210,7 +207,7 @@ class _RequestPageState extends State<RequestPage> {
                 ),
               ),
               ClipRRect(
-                borderRadius: BorderRadius.all(Radius.circular(15)),
+                borderRadius: const BorderRadius.all(Radius.circular(15)),
                 child: SizedBox(
                   height: 200,
                   child: GoogleMap(
@@ -230,7 +227,8 @@ class _RequestPageState extends State<RequestPage> {
                       await getlocation();
                     },
                     onTap: (latlng) async {
-                      print(latlng);
+                      lat = latlng.latitude.toString();
+                      lng = latlng.longitude.toString();
 
                       setState(() {
                         markers = {};
@@ -295,16 +293,16 @@ class _RequestPageState extends State<RequestPage> {
                       'bloodtype': _bloodgroup,
                       'city': _city.text,
                       'pin': _pincode.text,
-                      'lat': 0,
-                      'lng': 0,
+                      'lat': lat,
+                      'lng': lng,
                       'tcost': _tc,
                     };
                     var uData = {
                       'blood': _bloodgroup,
                       'city': _city.text,
                       'pin': _pincode.text,
-                      'lat': 0,
-                      'lng': 0,
+                      'lat': lat,
+                      'lng': lng,
                     };
                     users.doc(phonenumber).update(uData);
                     requests.doc(phonenumber).get().then((doc) {
