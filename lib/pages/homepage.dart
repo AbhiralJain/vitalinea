@@ -237,16 +237,14 @@ class _HomepageState extends State<Homepage> {
           children: [
             GoogleMap(
               onTap: (ltlng) {
-                setState(() {
-                  if (_menubar) _menubar = false;
-                });
+                print(ltlng);
               },
               markers: markers,
               zoomControlsEnabled: false,
               mapToolbarEnabled: false,
               initialCameraPosition: CameraPosition(
                 target: LatLng(Config.position!.latitude, Config.position!.longitude),
-                zoom: 15,
+                zoom: 14.75,
               ),
               onMapCreated: (GoogleMapController controller) async {
                 controller.setMapStyle(Config.mapStyle);
@@ -255,6 +253,7 @@ class _HomepageState extends State<Homepage> {
                 });
                 await initmarker();
                 await getUserData();
+                Navigator.pop(context);
               },
             ),
             Column(

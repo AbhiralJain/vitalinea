@@ -10,10 +10,7 @@ import 'package:vitalinea/program/config.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  bool status = await Config.requestpermission(Permission.location);
-  if (status) {
-    Config.position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-  } else {}
+
   runApp(const MyApp());
 }
 
@@ -94,6 +91,10 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   getfprefs() async {
     final prefs = await SharedPreferences.getInstance();
+    bool status = await Config.requestpermission(Permission.location);
+    if (status) {
+      Config.position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    } else {}
     if (prefs.getBool('signed') != null) {
       Navigator.of(context).push(
         MaterialPageRoute(

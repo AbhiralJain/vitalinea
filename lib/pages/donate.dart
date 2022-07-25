@@ -22,7 +22,8 @@ class _DonatePageState extends State<DonatePage> {
   final TextEditingController _pincode = TextEditingController();
   final Completer _controller = Completer();
   String _bloodgroup = 'A+';
-  late Position position;
+  String lat = '';
+  String lng = '';
   Set<Marker> markers = {};
   bool _agr = false;
 
@@ -189,6 +190,8 @@ class _DonatePageState extends State<DonatePage> {
                       await initmarker();
                     },
                     onTap: (latlng) async {
+                      lat = latlng.latitude.toString();
+                      lng = latlng.longitude.toString();
                       setState(() {
                         markers = {};
                         markers.add(
@@ -250,8 +253,8 @@ class _DonatePageState extends State<DonatePage> {
                             'pin': _pincode.text,
                             'donor': true,
                             'donations': 0,
-                            'lat': position.latitude.toString(),
-                            'lng': position.longitude.toString(),
+                            'lat': lat,
+                            'lng': lng,
                             'blood': _bloodgroup
                           };
                           final prefs = await SharedPreferences.getInstance();
