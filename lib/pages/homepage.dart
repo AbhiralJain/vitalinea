@@ -33,7 +33,7 @@ class _HomepageState extends State<Homepage> {
   late BitmapDescriptor op;
   late BitmapDescriptor on;
   bool _menubar = false;
-  bool _request = false;
+  bool? _request = false;
   int totaldonors = 0;
   final Completer _controller = Completer();
   final Set<Marker> markers = {};
@@ -312,7 +312,7 @@ class _HomepageState extends State<Homepage> {
                       ),
                       const Spacer(flex: 2),
                       Text(
-                        !_request ? 'Hello ${udata['name'].split(' ').first}!' : "$totaldonors donors around you",
+                        !_request! ? 'Hello ${udata['name'].split(' ').first}!' : "$totaldonors donors around you",
                         style: const TextStyle(
                           fontSize: 16,
                           fontFamily: 'Montserrat',
@@ -342,7 +342,7 @@ class _HomepageState extends State<Homepage> {
                         ),
                       );
 
-                      if (_request) {
+                      if (_request!) {
                         await getdonors();
                       }
                     },
