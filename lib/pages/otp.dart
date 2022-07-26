@@ -72,7 +72,8 @@ class _OtpPageState extends State<OtpPage> {
             'donations': 0,
             'lat': 'N.A',
             'lng': 'N.A',
-            'blood': 'N.A'
+            'blood': 'N.A',
+            'allowAnonymousCalling': false,
           };
           prefs.setBool('signed', true);
           prefs.setString('phonenumber', '${widget.countrycode}${widget.phonenumber}');
