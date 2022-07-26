@@ -108,6 +108,7 @@ class _HomepageState extends State<Homepage> {
           'lat': list.docs[i].get('lat'),
           'lng': list.docs[i].get('lng'),
           'blood': list.docs[i].get('blood'),
+          'allowAnonymousCalling': list.docs[i].get('allowAnonymousCalling'),
         });
       }
     }
@@ -156,13 +157,40 @@ class _HomepageState extends State<Homepage> {
                 title: '${donorlist[i]['name']} - ${donorlist[i]['blood']}',
                 desc: donorlist[i]['phone'],
                 buttons: [
+                  if (donorlist[i]['allowAnonymousCalling'])
+                    DialogButton(
+                      highlightColor: const Color.fromRGBO(0, 0, 0, 0),
+                      splashColor: const Color.fromRGBO(0, 0, 0, 0),
+                      radius: const BorderRadius.all(Radius.circular(20)),
+                      color: MyApp.myColor,
+                      onPressed: () async {
+                        final Uri url = Uri.parse("tel:${donorlist[i]['phone']}");
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url);
+                        } else {
+                          throw 'Could not launch $url';
+                        }
+                      },
+                      width: 120,
+                      child: const Text(
+                        "Call",
+                        style: TextStyle(fontFamily: 'Montserrat', color: Colors.white),
+                      ),
+                    ),
                   DialogButton(
                     highlightColor: const Color.fromRGBO(0, 0, 0, 0),
                     splashColor: const Color.fromRGBO(0, 0, 0, 0),
                     radius: const BorderRadius.all(Radius.circular(20)),
                     color: MyApp.myColor,
                     onPressed: () async {
-                      final Uri url = Uri.parse("tel:${donorlist[i]['phone']}");
+                      final Uri url = Uri(
+                        scheme: 'sms',
+                        path: donorlist[i]['phone'],
+                        queryParameters: <String, String>{
+                          'body':
+                              '${donorlist[i]['blood']} needed urgently. Please contact this number as soon as possible.',
+                        },
+                      );
                       if (await canLaunchUrl(url)) {
                         await launchUrl(url);
                       } else {
@@ -171,10 +199,10 @@ class _HomepageState extends State<Homepage> {
                     },
                     width: 120,
                     child: const Text(
-                      "Contact",
+                      "Message",
                       style: TextStyle(fontFamily: 'Montserrat', color: Colors.white),
                     ),
-                  )
+                  ),
                 ],
               ).show();
             }));

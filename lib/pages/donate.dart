@@ -26,6 +26,7 @@ class _DonatePageState extends State<DonatePage> {
   String lng = '';
   Set<Marker> markers = {};
   bool _agr = false;
+  bool _aac = false;
 
   late BitmapDescriptor my;
   initmarker() async {
@@ -123,7 +124,7 @@ class _DonatePageState extends State<DonatePage> {
                   ),
                   const Spacer(),
                   Container(
-                    margin: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                     alignment: Alignment.center,
                     padding: const EdgeInsets.only(left: 20, right: 10),
                     height: 50,
@@ -236,6 +237,36 @@ class _DonatePageState extends State<DonatePage> {
                   ),
                 ],
               ),
+              const Spacer(flex: 2),
+              Row(
+                children: [
+                  Checkbox(
+                    fillColor: MaterialStateProperty.all(
+                      MyApp.myColor,
+                    ),
+                    checkColor: MyApp.myColor,
+                    shape: const CircleBorder(),
+                    value: _aac,
+                    onChanged: (value) {
+                      setState(() {
+                        _aac = value!;
+                      });
+                    },
+                  ),
+                  Flexible(
+                    child: Text(
+                      'Allow anonymous calls from the seeker.',
+                      overflow: TextOverflow.visible,
+                      style: TextStyle(
+                        color: MyApp.myColor.shade700,
+                        fontSize: 20,
+                        fontFamily: 'Montserrat',
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               const Spacer(flex: 3),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -255,7 +286,8 @@ class _DonatePageState extends State<DonatePage> {
                             'donations': 0,
                             'lat': lat,
                             'lng': lng,
-                            'blood': _bloodgroup
+                            'blood': _bloodgroup,
+                            'allowAnonymousCalling': _aac
                           };
                           final prefs = await SharedPreferences.getInstance();
                           final String phonenumber = prefs.getString('phonenumber')!;
